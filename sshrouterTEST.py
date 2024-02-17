@@ -1,0 +1,57 @@
+from netmiko import ConnectHandler
+
+#First create the device object using a dictionary
+R1 = {
+	'device_type': 'cisco_ios',
+	'ip': '192.168.1.1',
+	'username': 'admin',
+	'password': 'pass123',
+	'secret': 'cisco'
+}
+
+R2 = {
+	'device_type': 'cisco_ios',
+	'ip': '192.168.1.2',
+	'username': 'admin',
+	'password': 'pass123',
+	'secret': 'cisco'
+}
+
+#Next establish the SSH connection
+net_connect = ConnectHandler(**R1)
+net_connect.enable()
+cfg = net_connect.send_config_set(["hostname Router1"])
+
+#Then send the command and print the output
+verify = net_connect.send_command('show running-config | i hostname')
+print(verify)
+
+config_commands = [
+	'int loopback 1',
+	'ip add 10.1.1.1 255.255.255.0',
+	'description kcedarbloom loopback'
+	]
+	
+sendConfig = net_connect.send_config_set(config_commands)
+print("{}\n".format(sendConfig))
+
+#Finally close the connection
+net_connect.disconnect()
+
+#Next establish the SSH connection to R2
+net_connect = ConnectHandler(**R2)
+net_connect.enable()
+cfg = net_connect.send_config_set(["hostname Router2"])
+
+#Configure R2
+config_commands= [
+	'int f0/1',
+	'ip add 172.16.1.1 255.255.255.0',
+	'description kcedarbloom try it yourself on R2'
+	]
+	
+sendConfig = net_connect.send_config_set(config_commands)
+print("{}\n".format(sendConfig))
+
+#Finally close the connection
+net_connect.disconnect()	
